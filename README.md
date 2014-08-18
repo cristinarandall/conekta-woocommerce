@@ -6,6 +6,7 @@ This is a Open Source and Free plugin. Enjoy !
 
 Features
 * Uses Conekta.js      - No PCI Compliance Issues ( Requires an SSL Certificate)
+* Credit and Debit Card implemented
 
 TODOs
 * Implement Cash payments
