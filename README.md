@@ -13,3 +13,4 @@ TODOs
 * Add installation instructions
 
 Tested on Wordpress 3.5.2  WooCommerce 2.0.13
+
