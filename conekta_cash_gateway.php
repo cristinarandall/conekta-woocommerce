@@ -9,9 +9,9 @@
      * License : http://cristinarandall.com/
      */
     
-    class ConektaCheckout extends WC_Payment_Gateway
+    class WC_Conekta_Cash_Gateway extends WC_Payment_Gateway
     {
-        protected $GATEWAY_NAME               = "ConektaCheckout";
+        protected $GATEWAY_NAME               = "WC_Conekta_Cash_Gateway";
         protected $usesandboxapi              = true;
         protected $order                      = null;
         protected $transactionId              = null;
@@ -22,37 +22,21 @@
         
         public function __construct()
         {
-            $this->id              = 'ConektaCheckout';
+            $this->id              = 'ConektaCash';
             $this->has_fields      = true;            
             $this->init_form_fields();
             $this->init_settings();
             $this->title              = $this->settings['title'];
             $this->description        = '';
-            $this->icon 		      = $this->settings['alternate_imageurl'] ? $this->settings['alternate_imageurl']  : WP_PLUGIN_URL . "/" . plugin_basename( dirname(__FILE__)) . '/images/credits.png';
+            $this->icon 		      = $this->settings['alternate_imageurl'] ? $this->settings['alternate_imageurl']  : WP_PLUGIN_URL . "/" . plugin_basename( dirname(__FILE__)) . '/images/cash.png';
             $this->usesandboxapi      = strcmp($this->settings['debug'], 'yes') == 0;
             $this->testApiKey 		  = $this->settings['test_api_key'  ];
             $this->liveApiKey 		  = $this->settings['live_api_key'  ];
-            $this->testPublishableKey = $this->settings['test_publishable_key'  ];
-            $this->livePublishableKey = $this->settings['live_publishable_key'  ];
-            $this->useUniquePaymentProfile = strcmp($this->settings['enable_unique_profile'], 'yes') == 0;
-            $this->publishable_key    = $this->usesandboxapi ? $this->testPublishableKey : $this->livePublishableKey;
             $this->secret_key         = $this->usesandboxapi ? $this->testApiKey : $this->liveApiKey;
-            
             add_action('woocommerce_update_options_payment_gateways_' . $this->id , array($this, 'process_admin_options'));
-            add_action('admin_notices'                              , array(&$this, 'perform_ssl_check'    ));
-            if($this->useInterval)
-            {
-                wp_enqueue_script('the_conektacheckout_js', plugins_url('/conektacheckout.js',__FILE__) );
-            }
-            wp_enqueue_script('the_conekta_js', 'https://conektaapi.s3.amazonaws.com/v0.3.0/js/conekta.js' );
+            add_action( 'woocommerce_thankyou_' . $this->id, array( $this, 'thankyou_page' ) );
+            add_action( 'woocommerce_email_before_order_table', array( $this, 'email_barcode' ) );
             
-        }
-        
-        public function perform_ssl_check()
-        {
-            if (!$this->usesandboxapi && get_option('woocommerce_force_ssl_checkout') == 'no' && $this->enabled == 'yes') :
-                echo '<div class="error"><p>'.sprintf(__('%s sandbox testing is disabled and can performe live transactions but the <a href="%s">force SSL option</a> is disabled; your checkout is not secure! Please enable SSL and ensure your server has a valid SSL certificate.', 'woothemes'), $this->GATEWAY_NAME, admin_url('admin.php?page=settings')).'</p></div>';
-            endif;
         }
         
         public function init_form_fields()
@@ -61,7 +45,7 @@
                                        'enabled' => array(
                                                           'type'        => 'checkbox',
                                                           'title'       => __('Enable/Disable', 'woothemes'),
-                                                          'label'       => __('Enable Credit Card Payment', 'woothemes'),
+                                                          'label'       => __('Enable Conekta Cash Payment', 'woothemes'),
                                                           'default'     => 'yes'
                                                           ),
                                        'debug' => array(
@@ -74,52 +58,84 @@
                                                         'type'        => 'text',
                                                         'title'       => __('Title', 'woothemes'),
                                                         'description' => __('This controls the title which the user sees during checkout.', 'woothemes'),
-                                                        'default'     => __('Credit Card Payment', 'woothemes')
+                                                        'default'     => __('Cash Payment', 'woothemes')
                                                         ),
                                        'test_api_key' => array(
                                                                'type'        => 'text',
                                                                'title'       => __('Conekta API Test Private key', 'woothemes'),
                                                                'default'     => __('', 'woothemes')
                                                                ),
-                                       'test_publishable_key' => array(
-                                                                       'type'        => 'text',
-                                                                       'title'       => __('Conekta API Test Public key', 'woothemes'),
-                                                                       'default'     => __('', 'woothemes')
-                                                                       ),
                                        'live_api_key' => array(
                                                                'type'        => 'text',
                                                                'title'       => __('Conekta API Live Private key', 'woothemes'),
                                                                'default'     => __('', 'woothemes')
                                                                ),
-                                       'live_publishable_key' => array(
-                                                                       'type'        => 'text',
-                                                                       'title'       => __('Conekta API Live Public key', 'woothemes'),
-                                                                       'default'     => __('', 'woothemes')
-                                                                       ),
                                        'alternate_imageurl' => array(
                                                                      'type'        => 'text',
                                                                      'title'       => __('Alternate Image to display on checkout, use fullly qualified url, served via https', 'woothemes'),
                                                                      'default'     => __('', 'woothemes')
                                                                      ),
-                                       'enable_unique_profile' => array(
-                                                                        'type'        => 'checkbox',
-                                                                        'title'       => __('Enable Payment Profile Creation', 'woothemes'),
-                                                                        'label'       => __('Use this to always create a Payment Profile in Conekta (always creates new profile, regardless of logged in user), and associate the charge with the profile. This allows you more easily identify order, credit, or even make an additional charge (from Conekta admin) at a later date.', 'woothemes'),
-                                                                        'default'     => 'no'
-                                                                        ),
-                                       
+                                       'description' => array(
+                                                              'title' => __( 'Description', 'woocommerce' ),
+                                                              'type' => 'textarea',
+                                                              'description' => __( 'Payment method description that the customer will see on your checkout.', 'woocommerce' ),
+                                                              'default' =>__( 'Por favor realiza el pago en el OXXO más cercano utilizando la clave que mandaremos a tu e-mail.', 'woocommerce' ),
+                                                              'desc_tip' => true,
+                                                              ),
+                                       'instructions' => array(
+                                                               'title' => __( 'Instructions', 'woocommerce' ),
+                                                               'type' => 'textarea',
+                                                               'description' => __( 'Instructions that will be added to the thank you page and emails.', 'woocommerce' ),
+                                                               'default' =>__( 'Por favor realiza el pago en el OXXO más cercano utilizando la clave que mandaremos a tu e-mail.', 'woocommerce' ),
+                                                               'desc_tip' => true,
+                                                               ),
                                        
                                        );
         }
         
+        /**
+         * Output for the order received page.
+         * @param string $order_id
+         */
+        function thankyou_page($order_id) {
+            $order = new WC_Order( $order_id );
+            echo '<p><strong>'.__('Código Barra').':</strong> <img src="' . get_post_meta( $order->id, 'conekta-barcodeurl', true ). '" /></p>';
+            echo '<p><strong>'.__('Referencia').':</strong> ' . get_post_meta( $order->id, 'conekta-barcode', true ). '</p>';
+        }
+        
+        /**
+         * Add content to the WC emails.
+         *
+         * @access public
+         * @param WC_Order $order
+         */
+        function email_barcode($order) {
+            echo '<strong>'.__('Código Barra').':</strong> <img src="' . get_post_meta( $order->id, 'conekta-barcodeurl', true ). '" />';
+            echo '<p><strong>'.__('Referencia').':</strong> ' . get_post_meta( $order->id, 'conekta-barcode', true ). '</p>';
+        }
+        
+        /**
+         * Add content to the WC emails.
+         *
+         * @access public
+         * @param WC_Order $order
+         * @param bool $sent_to_admin
+         * @param bool $plain_text
+         */
+        public function email_instructions( $order, $sent_to_admin, $plain_text = false ) {
+            if ( $this->instructions && 'on-hold' === $order->status ) {
+                echo wpautop( wptexturize( $this->instructions ) ) . PHP_EOL;
+            }
+        }
+        
         public function admin_options()
         {
-            include_once('templates/admin.php');
+            include_once('templates/cash_admin.php');
         }
         
         public function payment_fields()
         {
-            include_once('templates/payment.php');
+            include_once('templates/cash.php');
         }
         
         protected function send_to_conekta()
@@ -130,40 +146,23 @@
             $data = $this->getRequestData();
             
             try {
+  
+                $charge = Conekta_Charge::create(array(
+                                                       "amount"=> $data['amount'],
+                                                       "currency"=> $data['currency'],
+                                                       "description"=> "Recibo de pago para orden #",
+                                                       "cash"=> array(
+                                                                      "type"=>"oxxo"                        
+                                                                      )
+                                                       ));
                 
-                if($this->useUniquePaymentProfile)
-                {
-                    // Create the user as a customer on Conekta servers
-                    $customer = Conekta_Customer::create(array(
-                                                               "email" => $order->billing_email,
-                                                               "description" => $data['card']['name'],
-                                                               "name" => $data['card']['name'],
-                                                               "cards"  => array($data['token'])
-                                                               ));
-                    
-                    $charge = Conekta_Charge::create(array(
-                                                           "amount"      => $data['amount'],
-                                                           "currency"    => $data['currency'],
-                                                           "description" => $data['card']['name'],
-                                                           "card"    => $customer->id
-                                                           ));
-                } else {
-                    
-                    $charge = Conekta_Charge::create(array(
-                                                           "amount"      => $data['amount'],
-                                                           "currency"    => $data['currency'],
-                                                           "card"        => $data['token'],
-                                                           "description" => $data['card']['name'],
-                                                           "details"     => array(
-                                                                                  "email" => $data['card']['billing_email'],
-                                                                                  "name" => $data['card']['name'],
-                                                                                  )
-                                                           ));
-                }
-                $this->transactionId = $charge['id'];
+                $this->transactionId = $charge->id;
+                update_post_meta( $this->order->id, 'conekta-id', $charge->id );
+                update_post_meta( $this->order->id, 'conekta-creado', $charge->created_at );
+                update_post_meta( $this->order->id, 'conekta-expira', $charge->payment_method->expiry_date );
+                update_post_meta( $this->order->id, 'conekta-barcode', $charge->payment_method->barcode );
+                update_post_meta( $this->order->id, 'conekta-barcodeurl', $charge->payment_method->barcode_url );
                 
-                update_post_meta( $this->order->id, 'transaction_id', $this->transactionId);
-                update_post_meta( $this->order->id, 'key', $this->secret_key);
                 return true;
                 
             } catch(Conekta_Error $e) {
@@ -180,7 +179,12 @@
             $this->order        = new WC_Order($order_id);
             if ($this->send_to_conekta())
             {
-                $this->completeOrder();
+                // Mark as on-hold (we're awaiting the notification of payment)
+             $this->order->update_status('on-hold', __( 'Awaiting the conekta OXOO payment', 'woocommerce' ));
+                
+                // Remove cart
+                $woocommerce->cart->empty_cart();
+                unset($_SESSION['order_awaiting_payment']);
                 
                 $result = array(
                                 'result' => 'success',
@@ -199,7 +203,7 @@
         {
             $this->order->add_order_note(
                                          sprintf(
-                                                 "%s Credit Card Payment Failed : '%s'",
+                                                 "%s Cash Payment Failed : '%s'",
                                                  $this->GATEWAY_NAME,
                                                  $this->transactionErrorMessage
                                                  )
@@ -235,7 +239,6 @@
                 return array(
                              "amount"      => (float)$this->order->get_total() * 100,
                              "currency"    => strtolower(get_woocommerce_currency()),
-                             "token"       => $_POST['conektaToken'],
                              "description" => sprintf("Charge for %s", $this->order->billing_email),
                              "card"        => array(
                                                     "name"            => sprintf("%s %s", $this->order->billing_first_name, $this->order->billing_last_name),
@@ -252,7 +255,7 @@
         
     }
     
-    function conektacheckout_order_status_completed($order_id = null)
+    function conekta_cash_order_status_completed($order_id = null)
     {
         global $woocommerce;
         if (!$order_id)
@@ -268,13 +271,11 @@
         }
     }
     
-    
-    
-    function conektacheckout_add_creditcard_gateway($methods)
+    function conektacheckout_add_cash_gateway($methods)
     {
-        array_push($methods, 'ConektaCheckout');
+        array_push($methods, 'WC_Conekta_Cash_Gateway');
         return $methods;
     }
     
-    add_filter('woocommerce_payment_gateways',                      'conektacheckout_add_creditcard_gateway');
-    add_action('woocommerce_order_status_processing_to_completed',  'conektacheckout_order_status_completed' );
+    add_filter('woocommerce_payment_gateways',                      'conektacheckout_add_cash_gateway');
+    add_action('woocommerce_order_status_processing_to_completed',  'conekta_cash_order_status_completed' );

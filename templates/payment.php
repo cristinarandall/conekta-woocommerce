@@ -6,7 +6,6 @@
  * License : http://cristinarandall.com/
  */
 ?>
-
 <div id="conekta_pub_key" class="hidden" style="display:none" data-publishablekey="<?=$this->publishable_key ?>"> </div>
 <div class="clear"></div>
 <span class='payment-errors required'></span>
