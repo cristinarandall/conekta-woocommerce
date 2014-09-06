@@ -1,4 +1,4 @@
-ConektaCheckout
+Conekta Woocommerce 
 
 WooCommerce Payment Gateway for Conekta.io
 

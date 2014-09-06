@@ -143,6 +143,7 @@
             global $woocommerce;
             
             Conekta::setApiKey($this->secret_key);
+            Conekta::setLocale("es");
             $data = $this->getRequestData();
             
             try {
@@ -166,7 +167,7 @@
                 return true;
                 
             } catch(Conekta_Error $e) {
-                $description = $e->getMessage();
+                $description = $e->message_to_purchaser;
                 error_log('Gateway Error:' . $description . "\n");
                 $woocommerce->add_error(__('Payment error:', 'woothemes') . $description);
                 return false;
@@ -195,7 +196,7 @@
             else
             {
                 $this->markAsFailedPayment();
-                $woocommerce->add_error(__('Transaction Error: Could not complete the payment'), 'woothemes');
+                //$woocommerce->add_error(__('Transaction Error: Could not complete the payment'), 'woothemes');
             }
         }
         
