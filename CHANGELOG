@@ -4,7 +4,7 @@
 * Option to save customer profile.
 * Card validation at Conekta's servers so you don't have to be PCI.
 * Client side validation for credit cards.
-=== 0.1.0 2014-09-01
+=== 0.1.1 2014-09-01
 * Offline payments
 * Barcode sent in mail and displayed in order the confirmation page
 

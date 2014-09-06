@@ -131,7 +131,21 @@
             $data = $this->getRequestData();
             
             try {
-                
+               
+		$details = array(
+					"email" => $data['card']['email'], 
+					"name" => $data['card']['name'], 
+					"billing_address"  => array(
+								"street1" => $data['card']['address_line1'],
+								"street2" => $data['card']['address_line2'],
+                               	  				"zip" => $data['card']['address_zip'],
+								"city" => $data['card']['address_city'],
+                               	  				"phone" => $data['card']['phone'],
+								"country" => $data['card']['address_country'],
+                                 				"state" => $data['card']['address_state']
+ 								)
+                                );
+ 
                 if($this->useUniquePaymentProfile)
                 {
                     // Create the user as a customer on Conekta servers
@@ -145,7 +159,9 @@
                                                            "amount"      => $data['amount'],
                                                            "currency"    => $data['currency'],
                                                            "description" => $data['card']['name'],
-                                                           "card"    => $customer->id
+							   "reference_id" => $this->order->id,
+                                                           "card"    => $customer->id,
+                                                           "details"     => $details
                                                            ));
                 } else {
                     
@@ -153,14 +169,9 @@
                                                            "amount"      => $data['amount'],
                                                            "currency"    => $data['currency'],
                                                            "card"        => $data['token'],
+							   "reference_id" => $this->order->id,
                                                            "description" => $data['card']['name'],
-                                                           "details"     => array(
-                                                                                  "email" => $data['card']['email'],
-                                                                                  "name" => $data['card']['name'],
-                                                                                  "street1" => $data['card']['address_line1'],
-                                                                                  "zip" => $data['card']['address_zip'],
-                                                                                  "state" => $data['card']['address_state']
-                                                                                  )
+                                                           "details"     => $details
                                                            ));
                 }
                 $this->transactionId = $charge->id;
@@ -171,7 +182,7 @@
             } catch(Conekta_Error $e) {
                 $description = $e->message_to_purchaser;
                 error_log('Gateway Error:' . $description . "\n");
-                $woocommerce->add_error(__('Payment error:', 'woothemes') . $description);
+                $woocommerce->add_error(__('Error: ', 'woothemes') . $description);
                 return false;
             }
         }
@@ -193,7 +204,6 @@
             else
             {
                 $this->markAsFailedPayment();
-                //$woocommerce->add_error(__('Transaction Error: Could not complete the payment'), 'woothemes');
             }
         }
         
@@ -242,9 +252,11 @@
                              "card"        => array(
                                                     "name"            => sprintf("%s %s", $this->order->billing_first_name, $this->order->billing_last_name),
                                                     "address_line1"   => $this->order->billing_address_1,
+                                                    "phone"   => $this->order->billing_phone,
                                                     "email"   => $this->order->billing_email,
                                                     "address_line2"   => $this->order->billing_address_2,
                                                     "address_zip"     => $this->order->billing_postcode,
+                                                    "address_city"     => $this->order->billing_city,
                                                     "address_state"   => $this->order->billing_state,
                                                     "address_country" => $this->order->billing_country
                                                     )
