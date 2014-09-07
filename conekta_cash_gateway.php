@@ -5,8 +5,7 @@
     /*
      * Title   : Conekta Payment extension for WooCommerce
      * Author  : Cristina Randall
-     * Url     : http://cristinarandall.com/
-     * License : http://cristinarandall.com/
+     * Url     : https://github.com/cristinarandall/conekta-woocommerce
      */
     
     class WC_Conekta_Cash_Gateway extends WC_Payment_Gateway

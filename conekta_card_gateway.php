@@ -5,8 +5,7 @@
     /*
      * Title   : Conekta Payment extension for WooCommerce
      * Author  : Cristina Randall
-     * Url     : http://cristinarandall.com/
-     * License : http://cristinarandall.com/
+     * Url     : https://github.com/cristinarandall/conekta-woocommerce 
      */
    
     //extend WC’s base gateway class, http://docs.woothemes.com/wc-apidocs/class-WC_Payment_Gateway.html
@@ -41,10 +40,6 @@
             $this->secret_key         = $this->usesandboxapi ? $this->testApiKey : $this->liveApiKey;
             add_action('woocommerce_update_options_payment_gateways_' . $this->id , array($this, 'process_admin_options'));
             add_action('admin_notices'                              , array(&$this, 'perform_ssl_check'    ));
-            if($this->useInterval)
-            {
-                wp_enqueue_script('the_conektacheckout_js', plugins_url('/conekta_checkout.js',__FILE__) );
-            }
             wp_enqueue_script('the_conekta_js', 'https://conektaapi.s3.amazonaws.com/v0.3.0/js/conekta.js' );
         }
         

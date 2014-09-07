@@ -2,8 +2,7 @@
 /*
  * Title   : Conekta Payment extension for WooCommerce
  * Author  : Cristina Randall
- * Url     : http://cristinarandall.com/
- * License : http://cristinarandall.com/
+ * Url     : https://github.com/cristinarandall/conekta-woocommerce 
  */
 ?>
 <div id="conekta_pub_key" class="hidden" style="display:none" data-publishablekey="<?=$this->publishable_key ?>"> </div>
@@ -75,7 +74,7 @@
   };
 
     $('body').on('click', '#place_order,form#order_review input:submit', function(){
-      if(jQuery('.payment_methods input:checked').val() !== 'ConektaCheckout')
+      if(jQuery('.payment_methods input:checked').val() !== 'ConektaCard')
       {
         return true;
       }
@@ -86,16 +85,16 @@
 
 
     $('body').on('click', '#place_order,form.checkout input:submit', function(){
-      if(jQuery('.payment_methods input:checked').val() !== 'ConektaCheckout')
+      if(jQuery('.payment_methods input:checked').val() !== 'ConektaCard')
       {
         return true;
       }
       $('form.checkout').find('[name=conektaToken]').remove()
     })
 
-    $('form.checkout').bind('#place_order,checkout_place_order_ConektaCheckout', function(e){
+    $('form.checkout').bind('#place_order,checkout_place_order_ConektaCard', function(e){
 
-      if($('input[name=payment_method]:checked').val() != 'ConektaCheckout'){
+      if($('input[name=payment_method]:checked').val() != 'ConektaCard'){
           return true;
       }
 
