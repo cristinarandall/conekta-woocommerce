@@ -24,7 +24,7 @@
         
         public function __construct()
         {
-            $this->id              = 'ConektaCheckout';
+            $this->id              = 'Conekta Credit and Debit Card Gateway';
             $this->has_fields      = true;            
             $this->init_form_fields();
             $this->init_settings();
@@ -160,7 +160,7 @@
                     $charge = Conekta_Charge::create(array(
                                                            "amount"      => $data['amount'],
                                                            "currency"    => $data['currency'],
-                                                           "description" => $data['card']['name'],
+                                                           "description" => "Compra con orden # ". $this->order->id,
 							   "reference_id" => $this->order->id,
                                                            "card"    => $customer->id,
                                                            "details"     => $details
@@ -172,7 +172,7 @@
                                                            "currency"    => $data['currency'],
                                                            "card"        => $data['token'],
 							   "reference_id" => $this->order->id,
-                                                           "description" => $data['card']['name'],
+                                                           "description" => "Compra con orden # ". $this->order->id,
                                                            "details"     => $details
                                                            ));
                 }

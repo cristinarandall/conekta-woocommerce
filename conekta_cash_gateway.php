@@ -22,7 +22,7 @@
         
         public function __construct()
         {
-            $this->id              = 'ConektaCash';
+            $this->id              = 'Conekta Cash Gateway';
             $this->has_fields      = true;            
             $this->init_form_fields();
             $this->init_settings();
@@ -36,9 +36,30 @@
             add_action('woocommerce_update_options_payment_gateways_' . $this->id , array($this, 'process_admin_options'));
             add_action( 'woocommerce_thankyou_' . $this->id, array( $this, 'thankyou_page' ) );
             add_action( 'woocommerce_email_before_order_table', array( $this, 'email_barcode' ) );
-            
+            add_action( 'woocommerce_api_' . strtolower( get_class( $this ) ), array( $this, 'webhook_handler' ) );  
         }
-        
+
+        /**
+        * Updates the status of the order.
+        * Webhook needs to be added to Conekta account tusitio.com/wc-api/WC_Conekta_Cash_Gateway
+        */
+	public function webhook_handler() 
+	{
+	    header('HTTP/1.1 200 OK');
+	    $body = @file_get_contents('php://input');		
+	    $event = json_decode($body);
+	    $charge = $event->data->object;
+	    $order_id = $charge->reference_id;
+	    $paid_at = date("Y-m-d", $charge->paid_at);
+	    $order = new WC_Order( $order_id );
+		if (strpos($event->type, "charge.paid") !== false) 
+		{
+			update_post_meta( $order->id, 'conekta-paid-at', $paid_at);
+			$order->payment_complete();
+			$order->add_order_note(sprintf("Payment completed in Oxxo and notification of payment received"));
+		}
+	}
+   
         public function init_form_fields()
         {
             $this->form_fields = array(
@@ -141,20 +162,34 @@
         protected function send_to_conekta()
         {
             global $woocommerce;
-            
             Conekta::setApiKey($this->secret_key);
             Conekta::setLocale("es");
             $data = $this->getRequestData();
-            
+            $details = array(
+                                        "email" => $data['card']['email'],
+                                        "name" => $data['card']['name'],
+                                        "billing_address"  => array(
+                                                                "street1" => $data['card']['address_line1'],
+                                                                "street2" => $data['card']['address_line2'],
+                                                                "zip" => $data['card']['address_zip'],
+                                                                "city" => $data['card']['address_city'],
+                                                                "phone" => $data['card']['phone'],
+                                                                "country" => $data['card']['address_country'],
+                                                                "state" => $data['card']['address_state']
+                                                                )
+			    );
+ 
             try {
   
                 $charge = Conekta_Charge::create(array(
                                                        "amount"=> $data['amount'],
                                                        "currency"=> $data['currency'],
-                                                       "description"=> "Recibo de pago para orden #",
+                                                       "reference_id" => $this->order->id,
+                                                       "description"=> "Recibo de pago para orden # ". $this->order->id,
                                                        "cash"=> array(
                                                                       "type"=>"oxxo"                        
-                                                                      )
+                                                                      ),
+			                               "details"=>$details
                                                        ));
                 
                 $this->transactionId = $charge->id;
@@ -163,7 +198,6 @@
                 update_post_meta( $this->order->id, 'conekta-expira', $charge->payment_method->expiry_date );
                 update_post_meta( $this->order->id, 'conekta-barcode', $charge->payment_method->barcode );
                 update_post_meta( $this->order->id, 'conekta-barcodeurl', $charge->payment_method->barcode_url );
-                
                 return true;
                 
             } catch(Conekta_Error $e) {
@@ -196,7 +230,7 @@
             else
             {
                 $this->markAsFailedPayment();
-                //$woocommerce->add_error(__('Transaction Error: Could not complete the payment'), 'woothemes');
+                $woocommerce->add_error(__('Transaction Error: Could not complete the payment'), 'woothemes');
             }
         }
         
@@ -245,6 +279,8 @@
                                                     "name"            => sprintf("%s %s", $this->order->billing_first_name, $this->order->billing_last_name),
                                                     "address_line1"   => $this->order->billing_address_1,
                                                     "address_line2"   => $this->order->billing_address_2,
+                                                    "phone"   => $this->order->billing_phone,
+                                                    "email"   => $this->order->billing_email,
                                                     "address_zip"     => $this->order->billing_postcode,
                                                     "address_state"   => $this->order->billing_state,
                                                     "address_country" => $this->order->billing_country
@@ -271,7 +307,7 @@
             $params['amount'] = round($amount);
         }
     }
-    
+   
     function conektacheckout_add_cash_gateway($methods)
     {
         array_push($methods, 'WC_Conekta_Cash_Gateway');
