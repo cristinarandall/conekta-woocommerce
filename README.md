@@ -17,6 +17,8 @@ Current version features:
 * Automatic order status management
 * Email notifications on successful purchase
 
+![alt tag](https://raw.github.com/cristinarandall/conekta-woocommerce/master/readme_files/email.png)
+
 Version Compatibility
 ---------------------
 This plugin has been tested on Wordpress 3.5.2  WooCommerce 2.0.13

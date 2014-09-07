@@ -120,7 +120,7 @@
          */
         function thankyou_page($order_id) {
             $order = new WC_Order( $order_id );
-            echo '<p><strong>'.__('Código Barra').':</strong> <img src="' . get_post_meta( $order->id, 'conekta-barcodeurl', true ). '" /></p>';
+            echo '<p><strong>'.__('Código de Barra').':</strong> <img src="' . get_post_meta( $order->id, 'conekta-barcodeurl', true ). '" /></p>';
             echo '<p><strong>'.__('Referencia').':</strong> ' . get_post_meta( $order->id, 'conekta-barcode', true ). '</p>';
         }
         
