@@ -8,10 +8,12 @@
      * Url     : http://cristinarandall.com/
      * License : http://cristinarandall.com/
      */
-    
-    class ConektaCheckout extends WC_Payment_Gateway
+   
+    //extend WC’s base gateway class, http://docs.woothemes.com/wc-apidocs/class-WC_Payment_Gateway.html
+
+    class WC_Conekta_Card_Gateway extends WC_Payment_Gateway
     {
-        protected $GATEWAY_NAME               = "ConektaCheckout";
+        protected $GATEWAY_NAME               = "WC_Conekta_Card_Gateway";
         protected $usesandboxapi              = true;
         protected $order                      = null;
         protected $transactionId              = null;
@@ -224,7 +226,8 @@
             
             if ($this->order->status == 'completed')
                 return;
-            
+           
+	    // adjust stock levels and change order status 
             $this->order->payment_complete();
             $woocommerce->cart->empty_cart();
             
@@ -282,12 +285,11 @@
             $params['amount'] = round($amount);
         }
     }
-    
-    
-    
+   
+    // tell WC that WC_Conekta_Card_Gateway class exists 
     function conektacheckout_add_card_gateway($methods)
     {
-        array_push($methods, 'ConektaCheckout');
+        array_push($methods, 'WC_Conekta_Card_Gateway');
         return $methods;
     }
     
