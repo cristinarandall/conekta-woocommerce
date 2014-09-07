@@ -126,10 +126,24 @@
             $data = $this->getRequestData();
             
             try {
-               
+              
+
+                $line_items = array();
+                $items = $this->order->get_items();
+                foreach ($items as $item) {
+                        $line_items = array_merge($line_items, array(array(
+                        'name' => $item['name'],
+                        'unit_price' => $item['line_total'],
+                        'description' =>$item['name'],
+                        'quantity' =>$item['qty'],
+                        'type' => $item['type']
+                        ))
+                        );
+                }
 		$details = array(
 					"email" => $data['card']['email'], 
-					"name" => $data['card']['name'], 
+					"name" => $data['card']['name'],
+                                        "line_items"  => $line_items,
 					"billing_address"  => array(
 								"street1" => $data['card']['address_line1'],
 								"street2" => $data['card']['address_line2'],
@@ -140,20 +154,6 @@
                                  				"state" => $data['card']['address_state']
  								)
                                 );
-
-      		$line_items = array();
-      		$items = $this->order->get_items();
-      		foreach ($items as $item) {
-       			$line_items = array_merge($line_items, array(array(
-          		'name' => $item['name'],
-          		'unit_price' => $item['line_total'],
-          		'description' =>$item['name'],
-          		'quantity' =>$item['qty'],
-          		'type' => $item['type']
-          		))
-        		);
-       		} 
- 
                 if($this->useUniquePaymentProfile)
                 {
                     // Create the user as a customer on Conekta servers
@@ -170,7 +170,6 @@
 							   "reference_id" => $this->order->id,
                                                            "card"    => $customer->id,
                                                            "details"     => $details,
-							   "line_items"=> $line_items
                                                            ));
                 } else {
                     
@@ -181,7 +180,6 @@
 							   "reference_id" => $this->order->id,
                                                            "description" => "Compra con orden # ". $this->order->id,
                                                            "details"     => $details,
-							   "line_items"=> $line_items
                                                            ));
                 }
                 $this->transactionId = $charge->id;
