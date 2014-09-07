@@ -22,7 +22,7 @@
         
         public function __construct()
         {
-            $this->id              = 'Conekta Cash Gateway';
+            $this->id              = 'ConektaCash';
             $this->has_fields      = true;            
             $this->init_form_fields();
             $this->init_settings();

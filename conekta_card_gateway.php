@@ -24,7 +24,7 @@
         
         public function __construct()
         {
-            $this->id              = 'Conekta Credit and Debit Card Gateway';
+            $this->id              = 'ConektaCard';
             $this->has_fields      = true;            
             $this->init_form_fields();
             $this->init_settings();
@@ -41,6 +41,10 @@
             $this->secret_key         = $this->usesandboxapi ? $this->testApiKey : $this->liveApiKey;
             add_action('woocommerce_update_options_payment_gateways_' . $this->id , array($this, 'process_admin_options'));
             add_action('admin_notices'                              , array(&$this, 'perform_ssl_check'    ));
+            if($this->useInterval)
+            {
+                wp_enqueue_script('the_conektacheckout_js', plugins_url('/conekta_checkout.js',__FILE__) );
+            }
             wp_enqueue_script('the_conekta_js', 'https://conektaapi.s3.amazonaws.com/v0.3.0/js/conekta.js' );
         }
         
@@ -141,6 +145,19 @@
                                  				"state" => $data['card']['address_state']
  								)
                                 );
+
+      		$line_items = array();
+      		$items = $this->order->get_items();
+      		foreach ($items as $item) {
+       			$line_items = array_merge($line_items, array(array(
+          		'name' => $item['name'],
+          		'unit_price' => $item['line_total'],
+          		'description' =>$item['name'],
+          		'quantity' =>$item['qty'],
+          		'type' => $item['type']
+          		))
+        		);
+       		} 
  
                 if($this->useUniquePaymentProfile)
                 {
@@ -157,7 +174,8 @@
                                                            "description" => "Compra con orden # ". $this->order->id,
 							   "reference_id" => $this->order->id,
                                                            "card"    => $customer->id,
-                                                           "details"     => $details
+                                                           "details"     => $details,
+							   "line_items"=> $line_items
                                                            ));
                 } else {
                     
@@ -167,7 +185,8 @@
                                                            "card"        => $data['token'],
 							   "reference_id" => $this->order->id,
                                                            "description" => "Compra con orden # ". $this->order->id,
-                                                           "details"     => $details
+                                                           "details"     => $details,
+							   "line_items"=> $line_items
                                                            ));
                 }
                 $this->transactionId = $charge->id;
