@@ -7,4 +7,4 @@
 === 0.1.1 2014-09-01
 * Offline payments
 * Barcode sent in mail and displayed in order the confirmation page
-
+* Order Status chaged dynamically once webhook is added 

@@ -3,7 +3,7 @@
 Plugin Name: Conekta Payment Gateway
 Plugin URI: https://github.com/cristinarandall/conekta-woocommerce
 Description: Payment Gateway through Conekta.io for Woocommerce for both credit and debit cards as well as cash payments in OXXO.
-Version: 1.0.1
+Version: 0.1.1
 Author: Cristina Randall
 Author URI: https://github.com/cristinarandall
 License: GNU General Public License v3.0

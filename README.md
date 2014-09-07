@@ -25,7 +25,8 @@ Installation
 -----------
 
 * Clone the module using git clone --recursive git@github.com:cristinarandall/conekta-woocommerce.git
-* Upload the plugin zip file in Woocommerce > Plugins > Add New and then activate the plugin.
+* Upload the plugin zip file in Plugins > Add New and then click "Install Now"
+* Once installed, activate the plugin.
 * Add your API keys in Woocommerce > Settings > Checkout from your Conekta account (admin.conekta.io) in https://admin.conekta.io#developers.keys
 
 ![alt tag](https://raw.github.com/cristinarandall/conekta-woocommerce/master/readme_files/admin_card.png)
