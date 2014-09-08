@@ -293,6 +293,7 @@
                                                     "address_line2"   => $this->order->billing_address_2,
                                                     "phone"   => $this->order->billing_phone,
                                                     "email"   => $this->order->billing_email,
+                                                    "address_city"     => $this->order->billing_city,
                                                     "address_zip"     => $this->order->billing_postcode,
                                                     "address_state"   => $this->order->billing_state,
                                                     "address_country" => $this->order->billing_country
