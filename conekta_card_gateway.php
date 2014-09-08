@@ -111,11 +111,17 @@
                                        );
         }
         
+        /**
+        * Load the admin fields 
+        */
         public function admin_options()
         {
             include_once('templates/admin.php');
         }
-        
+        /**
+        * Load the credit card fields into the checkout view
+        * Contains js for tokenizing the credit card 
+        */        
         public function payment_fields()
         {
             include_once('templates/payment.php');
@@ -251,7 +257,11 @@
             unset($_SESSION['order_awaiting_payment']);
         }
         
-        
+       
+        /**
+        * Bundle the order information 
+        * Send as much information about the order as possible to Conekta
+        */ 
         protected function getRequestData()
         {
             if ($this->order AND $this->order != null)
