@@ -7,7 +7,7 @@
 ?>
 <div id="conekta_pub_key" class="hidden" style="display:none" data-publishablekey="<?=$this->publishable_key ?>"> </div>
 <div class="clear"></div>
-<span class='payment-errors required'></span>
+<span style="width: 100%; float: left; color: red;" class='payment-errors required'></span>
 <p class="form-row form-row-first">
   <label>Card Number <span class="required">*</span></label>
   <input class="input-text" type="text" size="19" maxlength="19" data-conekta="card[number]" />
