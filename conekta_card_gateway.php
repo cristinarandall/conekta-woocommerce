@@ -42,7 +42,11 @@
             add_action('admin_notices'                              , array(&$this, 'perform_ssl_check'    ));
             wp_enqueue_script('the_conekta_js', 'https://conektaapi.s3.amazonaws.com/v0.3.0/js/conekta.js' );
         }
-        
+       
+        /**
+        * Checks to see if SSL is configured and if plugin is configured in production mode 
+        * Forces use of SSL if not in testing 
+        */ 
         public function perform_ssl_check()
         {
             if (!$this->usesandboxapi && get_option('woocommerce_force_ssl_checkout') == 'no' && $this->enabled == 'yes') :
@@ -127,7 +131,6 @@
             
             try {
               
-
                 $line_items = array();
                 $items = $this->order->get_items();
                 foreach ($items as $item) {

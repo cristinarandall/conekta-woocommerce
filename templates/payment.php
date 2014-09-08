@@ -10,7 +10,7 @@
 <span class='payment-errors required'></span>
 <p class="form-row form-row-first">
   <label>Card Number <span class="required">*</span></label>
-  <input class="input-text" type="text" size="19" maxlength="19" data-conekta="card[number]" style="border-radius:6px;width:400px;"/>
+  <input class="input-text" type="text" size="19" maxlength="19" data-conekta="card[number]" />
 </p>
 <p class="form-row form-row-last">
 <label> Cardholder Name <span class="required">*</span></label>

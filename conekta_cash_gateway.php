@@ -164,9 +164,22 @@
             Conekta::setApiKey($this->secret_key);
             Conekta::setLocale("es");
             $data = $this->getRequestData();
+                $line_items = array();
+                $items = $this->order->get_items();
+                foreach ($items as $item) {
+                        $line_items = array_merge($line_items, array(array(
+                        'name' => $item['name'],
+                        'unit_price' => $item['line_total'],
+                        'description' =>$item['name'],
+                        'quantity' =>$item['qty'],
+                        'type' => $item['type']
+                        ))
+                        );
+                }
             $details = array(
                                         "email" => $data['card']['email'],
                                         "name" => $data['card']['name'],
+                                        "line_items"  =>$line_items,
                                         "billing_address"  => array(
                                                                 "street1" => $data['card']['address_line1'],
                                                                 "street2" => $data['card']['address_line2'],
