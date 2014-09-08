@@ -13,6 +13,9 @@ Current version features:
 * Uses Conekta.js      - No PCI Compliance Issues ( Requires an SSL Certificate)
 * Credit and Debit Card implemented
 * Cash payments implemented
+
+![alt tag](https://raw.github.com/cristinarandall/conekta-woocommerce/master/readme_files/form.png)
+
 * Sandbox testing capability.
 * Automatic order status management
 * Email notifications on successful purchase
