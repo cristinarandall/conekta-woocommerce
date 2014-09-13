@@ -9,25 +9,25 @@
 <div class="clear"></div>
 <span style="width: 100%; float: left; color: red;" class='payment-errors required'></span>
 <p class="form-row form-row-first">
-  <label>Card Number <span class="required">*</span></label>
+  <label>Número de tarjeta de crédito <span class="required">*</span></label>
   <input class="input-text" type="text" size="19" maxlength="19" data-conekta="card[number]" />
 </p>
 <p class="form-row form-row-last">
-<label> Cardholder Name <span class="required">*</span></label>
+<label> Nombre del tarjetahabiente <span class="required">*</span></label>
 <input type="text" data-conekta="card[name]" class="input-text" />
 </p>
 <div class="clear"></div>
 <p class="form-row form-row-first">
-  <label>Expiration Month <span class="required">*</span></label>
+  <label>Mes de expiración <span class="required">*</span></label>
   <input type="text" data-conekta="card[exp_month]" class="input-text" />
 </p>
 <p class="form-row form-row-last">
-  <label>Expiration Year  <span class="required">*</span></label>
+  <label>Año de expiración <span class="required">*</span></label>
   <input type="text" data-conekta="card[exp_year]" class="input-text" />
 </p>
 <div class="clear"></div>
 <p class="form-row form-row-first">
-    <label>Card Verification Number <span class="required">*</span></label>
+    <label>CVC <span class="required">*</span></label>
     <input class="input-text" type="text" maxlength="4" data-conekta="card[cvc]" value=""  style="border-radius:6px"/>
 </p>
 <div class="clear"></div>
